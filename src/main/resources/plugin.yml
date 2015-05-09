@@ -1,0 +1,3 @@
+name: ChatAPI
+version: 1.0
+main: codes.rusty.chatapi.ChatAPIPlugin
