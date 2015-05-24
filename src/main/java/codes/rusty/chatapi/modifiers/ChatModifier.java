@@ -1,8 +1,10 @@
 package codes.rusty.chatapi.modifiers;
 
 import codes.rusty.chatapi.components.ChatComponent;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.MethodWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 import java.util.Objects;
-import net.minecraft.server.v1_8_R2.EnumChatFormat;
 import org.bukkit.ChatColor;
 
 /**
@@ -11,6 +13,21 @@ import org.bukkit.ChatColor;
  * @author Rustywolf
  */
 public class ChatModifier {
+    
+    private static final Class clazzEnumChatFormat = ReflectionUtil.getNMSClass("EnumChatFormat");
+    private static final Class clazzChatClickable = ReflectionUtil.getNMSClass("ChatClickable");
+    private static final Class clazzChatHoverable = ReflectionUtil.getNMSClass("ChatHoverable");
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatModifier");
+    private static final MethodWrapper setColor = ReflectionUtil.getNMSMethod("ChatModifier", "setColor", clazzEnumChatFormat);
+    private static final MethodWrapper setBold = ReflectionUtil.getNMSMethod("ChatModifier", "setBold", Boolean.class);
+    private static final MethodWrapper setItalic = ReflectionUtil.getNMSMethod("ChatModifier", "setItalic", Boolean.class);
+    private static final MethodWrapper setStrikethrough = ReflectionUtil.getNMSMethod("ChatModifier", "setStrikethrough", Boolean.class);
+    private static final MethodWrapper setUnderline = ReflectionUtil.getNMSMethod("ChatModifier", "setUnderline", Boolean.class);
+    private static final MethodWrapper setRandom = ReflectionUtil.getNMSMethod("ChatModifier", "setRandom", Boolean.class);
+    private static final MethodWrapper setChatClickable = ReflectionUtil.getNMSMethod("ChatModifier", "setChatClickable", clazzChatClickable);
+    private static final MethodWrapper setChatHoverable = ReflectionUtil.getNMSMethod("ChatModifier", "setChatHoverable", clazzChatHoverable);
+    private static final MethodWrapper setInsertion = ReflectionUtil.getNMSMethod("ChatModifier", "setInsertion", String.class);
+    private static final MethodWrapper getNMSColor = ReflectionUtil.getNMSMethod("EnumChatFormat", "a", int.class);
     
     private Flags flags = new Flags();
     
@@ -31,17 +48,17 @@ public class ChatModifier {
      * 
      * @return the NMS representation of this class
      */
-    public net.minecraft.server.v1_8_R2.ChatModifier build() {
-        net.minecraft.server.v1_8_R2.ChatModifier modifier = new net.minecraft.server.v1_8_R2.ChatModifier();
-        modifier.setColor((color == null) ? null : EnumChatFormat.a(Integer.parseInt(color.getChar() + "", 16)));
-        modifier.setBold(bold);
-        modifier.setItalic(italic);
-        modifier.setStrikethrough(strikethrough);
-        modifier.setUnderline(underlined);
-        modifier.setRandom(magic);
-        modifier.setChatClickable((click == null) ? null : click.build());
-        modifier.setChatHoverable((hover == null) ? null : hover.build());
-        modifier.setInsertion(insertion);
+    public Object build() {
+        Object modifier = constructor.construct();
+        setColor.invoke(modifier, ((color == null) ? null : getNMSColor.invoke(null, Integer.parseInt(color.getChar() + "", 16))));
+        setBold.invoke(modifier, bold);
+        setItalic.invoke(modifier, italic);
+        setStrikethrough.invoke(modifier, strikethrough);
+        setUnderline.invoke(modifier, underlined);
+        setRandom.invoke(modifier, magic);
+        setChatClickable.invoke(modifier, (click == null) ? null : click.build());
+        setChatHoverable.invoke(modifier, (hover == null) ? null : hover.build());
+        setInsertion.invoke(modifier, insertion);
         return modifier;
     }
     

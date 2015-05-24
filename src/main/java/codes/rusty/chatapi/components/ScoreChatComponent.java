@@ -1,7 +1,7 @@
 package codes.rusty.chatapi.components;
 
-import net.minecraft.server.v1_8_R2.ChatComponentScore;
-import net.minecraft.server.v1_8_R2.IChatBaseComponent;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 
 /**
  * ChatAPI representation of NMS ChatComponentScore.
@@ -10,6 +10,8 @@ import net.minecraft.server.v1_8_R2.IChatBaseComponent;
  */
 public class ScoreChatComponent extends ChatComponent {
 
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatComponentScore").withArgs(String.class, String.class);
+    
     private final String name;
     private final String objective;
     
@@ -25,8 +27,8 @@ public class ScoreChatComponent extends ChatComponent {
     }
 
     @Override
-    protected IChatBaseComponent compile() {
-        return new ChatComponentScore(name, objective);
+    protected Object compile() {
+        return constructor.construct(name, objective);
     }
     
 }

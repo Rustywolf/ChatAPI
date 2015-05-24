@@ -1,7 +1,8 @@
 package codes.rusty.chatapi.components;
 
-import net.minecraft.server.v1_8_R2.ChatComponentText;
-import net.minecraft.server.v1_8_R2.IChatBaseComponent;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.MethodWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 
 /**
  * ChatAPI utility {@link ChatComponent} for accepting an NMS IChatBaseComponent.
@@ -10,7 +11,11 @@ import net.minecraft.server.v1_8_R2.IChatBaseComponent;
  */
 public class NMSChatComponent extends ChatComponent {
     
-    private final IChatBaseComponent component;
+    private static final Class clazzIChatBaseComponent = ReflectionUtil.getNMSClass("IChatBaseComponent");
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatComponentText").withArgs(String.class);
+    private static final MethodWrapper addSibling = ReflectionUtil.getNMSMethod("ChatComponentText", "addSibling", clazzIChatBaseComponent);
+    
+    private final Object component;
     
     /**
      * Creates a {@link NMSChatComponent} with the provided component as a child.
@@ -19,13 +24,15 @@ public class NMSChatComponent extends ChatComponent {
      * 
      * @param component the NMS component to display
      */
-    public NMSChatComponent(IChatBaseComponent component) {
+    public NMSChatComponent(Object component) {
         this.component = component;
     }
 
     @Override
-    protected IChatBaseComponent compile() {
-        return new ChatComponentText("").addSibling(component);
+    protected Object compile() {
+        Object base = constructor.construct("");
+        addSibling.invoke(base, component);
+        return base;
     }
     
 }

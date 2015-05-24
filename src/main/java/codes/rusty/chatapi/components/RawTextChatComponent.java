@@ -1,8 +1,8 @@
 package codes.rusty.chatapi.components;
 
-import net.minecraft.server.v1_8_R2.ChatComponentText;
-import net.minecraft.server.v1_8_R2.IChatBaseComponent;
-import org.bukkit.craftbukkit.v1_8_R2.util.CraftChatMessage;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.MethodWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 
 /**
  * ChatAPI utility {@link ChatComponent} for parsing legacy text.
@@ -11,6 +11,11 @@ import org.bukkit.craftbukkit.v1_8_R2.util.CraftChatMessage;
  */
 public class RawTextChatComponent extends ChatComponent {
 
+    private static final Class clazzIChatBaseComponent = ReflectionUtil.getNMSClass("IChatBaseComponent");
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatComponentText").withArgs(String.class);
+    private static final MethodWrapper addSibling = ReflectionUtil.getNMSMethod("ChatComponentText", "addSibling", clazzIChatBaseComponent);
+    private static final MethodWrapper fromString = ReflectionUtil.getOBCMethod("CraftChatMessage", "fromString", String.class, Boolean.class);
+    
     private final String text;
     
     /**
@@ -37,10 +42,10 @@ public class RawTextChatComponent extends ChatComponent {
     }
     
     @Override
-    protected IChatBaseComponent compile() {
-        IChatBaseComponent base = new ChatComponentText("");
-        for (IChatBaseComponent component : CraftChatMessage.fromString(text, true)) {
-            base.addSibling(component);
+    protected Object compile() {
+        Object base = constructor.construct("");
+        for (Object component : (Object[]) fromString.invoke(null, text, true)) {
+            addSibling.invoke(base, component);
         }
         
         return base;

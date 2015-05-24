@@ -1,8 +1,8 @@
 package codes.rusty.chatapi.components;
 
 import codes.rusty.chatapi.util.ComponentConsumer;
-import net.minecraft.server.v1_8_R2.ChatComponentText;
-import net.minecraft.server.v1_8_R2.IChatBaseComponent;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 
 /**
  * ChatAPI utility {@link ChatComponent} for modifying a ChatAPI message after creation.
@@ -11,6 +11,8 @@ import net.minecraft.server.v1_8_R2.IChatBaseComponent;
  */
 public class DynamicChatComponent extends ChatComponent {
 
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatComponentText").withArgs(String.class);
+    
     /**
      * Adds the given component at the given index.
      * 
@@ -95,8 +97,8 @@ public class DynamicChatComponent extends ChatComponent {
     }
     
     @Override
-    protected IChatBaseComponent compile() {
-        return new ChatComponentText("");
+    protected Object compile() {
+        return constructor.construct("");
     }
     
 }

@@ -4,17 +4,10 @@ import codes.rusty.chatapi.modifiers.ChatModifier;
 import codes.rusty.chatapi.modifiers.ClickAction;
 import codes.rusty.chatapi.modifiers.HoverAction;
 import codes.rusty.chatapi.util.ComponentConsumer;
-import codes.rusty.chatapi.nms.LocationCommandListener;
-import net.minecraft.server.v1_8_R2.ChatComponentText;
-import net.minecraft.server.v1_8_R2.ChatComponentUtils;
-import net.minecraft.server.v1_8_R2.EntityPlayer;
-import net.minecraft.server.v1_8_R2.IChatBaseComponent;
-import net.minecraft.server.v1_8_R2.ICommandListener;
-import net.minecraft.server.v1_8_R2.MinecraftServer;
-import net.minecraft.server.v1_8_R2.WorldServer;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.MethodWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 /**
@@ -24,6 +17,10 @@ import org.bukkit.entity.Player;
  */
 public class ChatMessage extends ChatComponent {
 
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatComponentText").withArgs(String.class);
+    private static final MethodWrapper getHandle = ReflectionUtil.getOBCMethod("CraftPlayer", "getHandle");
+    private static final Class clazzIChatBaseComponent = ReflectionUtil.getNMSClass("IChatBaseComponent");
+    private static final MethodWrapper sendMessage = ReflectionUtil.getNMSMethod("EntityPlayer", "sendMessage", clazzIChatBaseComponent);
     public ChatMessage() {}
 
     /**
@@ -34,20 +31,10 @@ public class ChatMessage extends ChatComponent {
      * @see ChatComponent#build() 
      */
     public void send(Player... players) {
-        send(null, players);
-    }
-    
-    /**
-     * Sends the {@link IChatBaseComponent} built by this object to the given players.
-     * Features that require a location (for example, selectors) will be centered on the given location.
-     * 
-     * @param players the players to send this component to
-     * @param location the location to center this component on
-     * @see ChatComponent#build() 
-     */
-    public void send(Location location, Player... players) {
         // Copied from VanillaCommandWrapper.java, <3 ToD
-        ICommandListener commandListener = (location == null) ? MinecraftServer.getServer() : new LocationCommandListener(location);
+        
+        // Removed until i can be bothered adding ASM for the LocationCommandListener
+        /*ICommandListener commandListener = (location == null) ? MinecraftServer.getServer() : new LocationCommandListener(location);
         WorldServer[] prev = MinecraftServer.getServer().worldServer;
         MinecraftServer server = MinecraftServer.getServer();
         server.worldServer = new WorldServer[server.worlds.size()];
@@ -60,26 +47,28 @@ public class ChatMessage extends ChatComponent {
                 continue;
             }
             server.worldServer[pos] = world;
-        }
+        }*/
         
-        IChatBaseComponent built = this.build();
+        Object built = this.build();
         for (Player player : players) {
-            EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-            try {
+            Object entityPlayer = getHandle.invoke(player);
+            sendMessage.invoke(entityPlayer, built);
+            /*try {
                 entityPlayer.sendMessage(ChatComponentUtils.filterForDisplay(commandListener, built, entityPlayer));
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("There was an error building this chat message, attempting safe call");
                 entityPlayer.sendMessage(built);
-            }
+            }*/
+            
         }
         
-        server.worldServer = prev;
+        // server.worldServer = prev;
     }
 
     @Override
-    protected IChatBaseComponent compile() {
-        return new ChatComponentText("");
+    protected Object compile() {
+        return constructor.construct("");
     }
 
     @Override

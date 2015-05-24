@@ -1,7 +1,7 @@
 package codes.rusty.chatapi.components;
 
-import net.minecraft.server.v1_8_R2.ChatComponentText;
-import net.minecraft.server.v1_8_R2.IChatBaseComponent;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 
 /**
  * ChatAPI utility {@link ChatComponent} for containing children.
@@ -10,11 +10,13 @@ import net.minecraft.server.v1_8_R2.IChatBaseComponent;
  */
 public class BranchChatComponent extends ChatComponent {
 
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatComponentText").withArgs(String.class);
+    
     public BranchChatComponent() {}
     
     @Override
-    protected IChatBaseComponent compile() {
-        return new ChatComponentText("");
+    protected Object compile() {
+        return constructor.construct("");
     }
     
 }

@@ -1,15 +1,18 @@
 package codes.rusty.chatapi.modifiers;
 
 import codes.rusty.chatapi.components.ChatComponent;
-import codes.rusty.chatapi.components.ChatComponent;
 import codes.rusty.chatapi.components.RawTextChatComponent;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 import java.util.Objects;
-import net.minecraft.server.v1_8_R2.ChatHoverable;
 
 /**
  * ChatAPI representation of the NMS ChatHoverable
  */
 public class HoverEvent {
+    
+    private static final Class clazzEnumHoverAction = ReflectionUtil.getNMSClass("EnumHoverAction");
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatHoverable").withArgs(clazzEnumHoverAction, String.class);
     
     private final HoverAction action;
     private final ChatComponent text;
@@ -41,8 +44,8 @@ public class HoverEvent {
      * 
      * @return an NMS representation of this {@link HoverEvent}
      */
-    public ChatHoverable build() {
-        return new ChatHoverable(action.getNMSValue(), text.build());
+    public Object build() {
+        return constructor.construct(action.getNMSValue(), text.build());
     }
 
     @Override

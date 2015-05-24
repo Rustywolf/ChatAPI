@@ -6,9 +6,10 @@ import codes.rusty.chatapi.modifiers.ClickAction;
 import codes.rusty.chatapi.modifiers.ClickEvent;
 import codes.rusty.chatapi.modifiers.HoverAction;
 import codes.rusty.chatapi.modifiers.HoverEvent;
+import codes.rusty.chatapi.util.MethodWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.server.v1_8_R2.IChatBaseComponent;
 import org.bukkit.ChatColor;
 
 /**
@@ -18,6 +19,11 @@ import org.bukkit.ChatColor;
  * @author Rustywolf
  */
 public abstract class ChatComponent {
+    
+    private static final Class clazzChatModifier = ReflectionUtil.getNMSClass("ChatModifier");
+    private static final Class clazzIChatBaseComponent = ReflectionUtil.getNMSClass("IChatBaseComponent");
+    private static final MethodWrapper setChatModifier = ReflectionUtil.getNMSMethod("IChatBaseComponent", "setChatModifier", clazzChatModifier);
+    private static final MethodWrapper addSibling = ReflectionUtil.getNMSMethod("IChatBaseComponent", "addSibling", clazzIChatBaseComponent);
     
     protected ChatModifier modifier = new ChatModifier();
     protected List<ChatComponent> children = new ArrayList<>();
@@ -33,18 +39,18 @@ public abstract class ChatComponent {
      * @return created IChatBaseComponent 
      * @see #build(ChatModifier) 
      */
-    public final IChatBaseComponent build() {
+    public final Object build() {
         return build(null);
     }
     
-    protected final IChatBaseComponent build(ChatModifier parentModifier) {
-        IChatBaseComponent component = compile();
+    protected final Object build(ChatModifier parentModifier) {
+        Object component = compile();
         
         ChatModifier inherited = (parentModifier == null) ? modifier : ChatModifier.inherit(modifier, parentModifier);
-        component.setChatModifier(inherited.isReset() ? null : inherited.build());
+        setChatModifier.invoke(component, (inherited.isReset() ? null : inherited.build()));
         
         for (ChatComponent child : children) {
-            component.addSibling(child.build(inherited));
+            addSibling.invoke(component, (child.build(inherited)));
         }
         
         return component;
@@ -258,6 +264,6 @@ public abstract class ChatComponent {
         return this;
     }
 
-    protected abstract IChatBaseComponent compile();
+    protected abstract Object compile();
 
 }

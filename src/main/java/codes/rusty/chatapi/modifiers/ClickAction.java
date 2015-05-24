@@ -1,17 +1,21 @@
 package codes.rusty.chatapi.modifiers;
 
-import net.minecraft.server.v1_8_R2.ChatClickable.EnumClickAction;
+import codes.rusty.chatapi.util.ReflectionUtil;
 
 public enum ClickAction {
-    OPEN_URL(EnumClickAction.OPEN_URL), OPEN_FILE(EnumClickAction.OPEN_FILE), RUN_COMMAND(EnumClickAction.RUN_COMMAND), TWITCH_USER_INFO(EnumClickAction.TWITCH_USER_INFO), SUGGEST_COMMAND(EnumClickAction.SUGGEST_COMMAND), CHANGE_PAGE(EnumClickAction.CHANGE_PAGE);
+    OPEN_URL(getNMSAction("OPEN_URL")), OPEN_FILE(getNMSAction("OPEN_FILE")), RUN_COMMAND(getNMSAction("RUN_COMMAND")), TWITCH_USER_INFO(getNMSAction("TWITCH_USER_INFO")), SUGGEST_COMMAND(getNMSAction("SUGGEST_COMMAND")), CHANGE_PAGE(getNMSAction("CHANGE_PAGE"));
     
-    private final EnumClickAction action;
+    private final Object action;
 
-    private ClickAction(EnumClickAction action) {
+    private ClickAction(Object action) {
         this.action = action;
     }
     
-    public EnumClickAction getNMSValue() {
+    public Object getNMSValue() {
         return action;
+    }
+    
+    public static Object getNMSAction(String name) {
+        return ReflectionUtil.getNMSField("EnumClickAction", name).get(null);
     }
 }

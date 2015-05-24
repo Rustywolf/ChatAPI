@@ -1,12 +1,16 @@
 package codes.rusty.chatapi.modifiers;
 
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 import java.util.Objects;
-import net.minecraft.server.v1_8_R2.ChatClickable;
 
 /**
  * ChatAPI representation of the NMS ChatClickable
  */
 public class ClickEvent {
+    
+    private static final Class clazzEnumClickAction = ReflectionUtil.getNMSClass("EnumClickAction");
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatClickable").withArgs(clazzEnumClickAction, String.class);
     
     private final ClickAction action;
     private final String text;
@@ -27,8 +31,8 @@ public class ClickEvent {
      * 
      * @return an NMS representation of this {@link ClickEvent}
      */
-    public ChatClickable build() {
-        return new ChatClickable(action.getNMSValue(), text);
+    public Object build() {
+        return constructor.construct(action.getNMSValue(), text);
     }
 
     @Override

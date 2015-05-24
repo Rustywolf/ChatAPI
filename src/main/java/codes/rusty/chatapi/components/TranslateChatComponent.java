@@ -1,7 +1,7 @@
 package codes.rusty.chatapi.components;
 
-import net.minecraft.server.v1_8_R2.IChatBaseComponent;
-import net.minecraft.server.v1_8_R2.ChatMessage;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 
 /**
  * ChatAPI representation of NMS ChatMessage.
@@ -10,6 +10,8 @@ import net.minecraft.server.v1_8_R2.ChatMessage;
  */
 public class TranslateChatComponent extends ChatComponent {
 
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatMessage").withArgs(String.class, Object[].class);
+    
     private final String key;
     private final Object[] values;
     
@@ -25,8 +27,8 @@ public class TranslateChatComponent extends ChatComponent {
     }
 
     @Override
-    protected IChatBaseComponent compile() {
-        return new ChatMessage(key, (Object[]) values);
+    protected Object compile() {
+        return constructor.construct(key, (Object) values);
     }
     
 }

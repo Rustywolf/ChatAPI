@@ -1,7 +1,7 @@
 package codes.rusty.chatapi.components;
 
-import net.minecraft.server.v1_8_R2.ChatComponentSelector;
-import net.minecraft.server.v1_8_R2.IChatBaseComponent;
+import codes.rusty.chatapi.util.ConstructorWrapper;
+import codes.rusty.chatapi.util.ReflectionUtil;
 
 /**
  * ChatAPI representation of NMS ChatComponentSelector.
@@ -10,6 +10,8 @@ import net.minecraft.server.v1_8_R2.IChatBaseComponent;
  */
 public class SelectorChatComponent extends ChatComponent {
 
+    private static final ConstructorWrapper constructor = ReflectionUtil.getNMSConstructor("ChatComponentSelector").withArgs(String.class);
+    
     private final String selector;
 
     /**
@@ -22,8 +24,8 @@ public class SelectorChatComponent extends ChatComponent {
     }
     
     @Override
-    protected IChatBaseComponent compile() {
-        return new ChatComponentSelector(selector);
+    protected Object compile() {
+        return constructor.construct(selector);
     }
     
 }
